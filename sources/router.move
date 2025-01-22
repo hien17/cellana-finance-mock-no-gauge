@@ -10,9 +10,7 @@ module cellana::router {
     use cellana::coin_wrapper::is_wrapper;
 
     use cellana::coin_wrapper;
-    use cellana::gauge;
     use cellana::liquidity_pool::{Self, LiquidityPool};
-    use cellana::vote_manager;
 
     /// Output is less than the desired minimum amount.
     const EINSUFFICIENT_OUTPUT_AMOUNT: u64 = 1;
@@ -27,15 +25,11 @@ module cellana::router {
 
     public entry fun create_pool(token_1: Object<Metadata>, token_2: Object<Metadata>, is_stable: bool) {
         let pool = liquidity_pool::create(token_1, token_2, is_stable);
-        vote_manager::whitelist_default_reward_pool(pool);
-        vote_manager::create_gauge_internal(pool);
     }
 
     public entry fun create_pool_coin<CoinType>(token_2: Object<Metadata>, is_stable: bool) {
         let token_1 = coin_wrapper::create_fungible_asset<CoinType>();
         let pool = liquidity_pool::create(token_1, token_2, is_stable);
-        vote_manager::whitelist_default_reward_pool(pool);
-        vote_manager::create_gauge_internal(pool);
     }
 
     public entry fun create_pool_both_coins<CoinType1, CoinType2>(is_stable: bool) {
@@ -43,8 +37,6 @@ module cellana::router {
         let token_2 = coin_wrapper::create_fungible_asset<CoinType2>();
 
         let pool = liquidity_pool::create(token_1, token_2, is_stable);
-        vote_manager::whitelist_default_reward_pool(pool);
-        vote_manager::create_gauge_internal(pool);
     }
 
     /////////////////////////////////////////////////// USERS /////////////////////////////////////////////////////////
@@ -317,9 +309,6 @@ module cellana::router {
         assert!(amount_2 == fungible_asset::amount(&tokens_2), EINVALID_INPUT_DATA);
         let lp_token_amount = liquidity_pool::mint_lp(lp, tokens_1, tokens_2, is_stable);
 
-        // stake lp to the gauge
-        let gauge = vote_manager::get_gauge(pool);
-        gauge::stake(lp, gauge, lp_token_amount);
     }
 
     public entry fun add_liquidity_and_stake_coin_entry<CoinType>(
@@ -344,9 +333,6 @@ module cellana::router {
         assert!(amount_2 == fungible_asset::amount(&token_2), EINVALID_INPUT_DATA);
         let lp_token_amount = liquidity_pool::mint_lp(lp, coin_wrapper::wrap(token_1), token_2, is_stable);
 
-        // stake lp to the gauge
-        let gauge = vote_manager::get_gauge(pool);
-        gauge::stake(lp, gauge, lp_token_amount);
     }
 
     public entry fun add_liquidity_and_stake_both_coins_entry<CoinType1, CoinType2>(
@@ -377,9 +363,6 @@ module cellana::router {
             is_stable
         );
 
-        // stake lp to the gauge
-        let gauge = vote_manager::get_gauge(pool);
-        gauge::stake(lp, gauge, lp_token_amount);
     }
 
     public entry fun unstake_and_remove_liquidity_entry(
@@ -393,7 +376,6 @@ module cellana::router {
         recipient: address,
     ) {
         let pool = liquidity_pool::liquidity_pool(token_1, token_2, is_stable);
-        gauge::unstake_lp(lp, vote_manager::get_gauge(pool), liquidity);
 
         assert!(!coin_wrapper::is_wrapper(token_1) && !coin_wrapper::is_wrapper(token_2), ENOT_NATIVE_FUNGIBLE_ASSETS);
         let (amount_1, amount_2) = remove_liquidity_internal(
@@ -421,7 +403,6 @@ module cellana::router {
     ) {
         let token_1 = coin_wrapper::get_wrapper<CoinType>();
         let pool = liquidity_pool::liquidity_pool(token_1, token_2, is_stable);
-        gauge::unstake_lp(lp, vote_manager::get_gauge(pool), liquidity);
 
         assert!(!coin_wrapper::is_wrapper(token_2), ENOT_NATIVE_FUNGIBLE_ASSETS);
         let (amount_1, amount_2) =
@@ -442,7 +423,6 @@ module cellana::router {
         let token_1 = coin_wrapper::get_wrapper<CoinType1>();
         let token_2 = coin_wrapper::get_wrapper<CoinType2>();
         let pool = liquidity_pool::liquidity_pool(token_1, token_2, is_stable);
-        gauge::unstake_lp(lp, vote_manager::get_gauge(pool), liquidity);
 
         let (amount_1, amount_2) =
             remove_liquidity_internal(lp, token_1, token_2, is_stable, liquidity, amount_1_min, amount_2_min);

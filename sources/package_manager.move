@@ -5,6 +5,8 @@ module cellana::package_manager {
     use std::string::String;
 
     friend cellana::coin_wrapper;
+    friend cellana::liquidity_pool;
+    friend cellana::cellana_token;
 
     /// Stores permission config such as SignerCapability for controlling the resource account.
     struct PermissionConfig has key {

@@ -36,9 +36,7 @@ module cellana::liquidity_pool {
     use cellana::coin_wrapper;
     use cellana::package_manager;
 
-    friend cellana::gauge;
     friend cellana::router;
-    friend cellana::rewards_pool;
 
     const FEE_SCALE: u64 = 10000;
     const LP_TOKEN_DECIMALS: u8 = 8;
@@ -566,7 +564,7 @@ module cellana::liquidity_pool {
         fungible_asset_1: FungibleAsset,
         fungible_asset_2: FungibleAsset,
         is_stable: bool,
-    ): u64 acquires FeesAccounting, LiquidityPool {
+    ): u64 acquires LiquidityPool {
         let token_1 = fungible_asset::metadata_from_asset(&fungible_asset_1);
         let token_2 = fungible_asset::metadata_from_asset(&fungible_asset_2);
         if (!is_sorted(token_1, token_2)) {
@@ -989,12 +987,4 @@ module cellana::liquidity_pool {
         abort 0
     }
 
-    #[test_only]
-    friend cellana::liquidity_pool_tests;
-
-    #[test_only]
-    friend cellana::router_tests;
-
-    #[test_only]
-    friend cellana::vote_manager_tests;
 }

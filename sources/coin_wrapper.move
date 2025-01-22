@@ -13,6 +13,8 @@ module cellana::coin_wrapper {
     use std::signer;
     use cellana::package_manager;
 
+    friend cellana::router;
+
     const COIN_WRAPPER_NAME: vector<u8> = b"COIN_WRAPPER";
 
     /// Stores the refs for a specific fungible asset wrapper for wrapping and unwrapping.

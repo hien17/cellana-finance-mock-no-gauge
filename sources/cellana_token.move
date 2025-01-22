@@ -9,12 +9,6 @@ module cellana::cellana_token {
     use std::string;
     use std::option;
 
-    // For minting emissions.
-    friend cellana::minter;
-    // For burning leftover emissions.
-    friend cellana::vote_manager;
-    // For locking/adding more $CELL into a voting escrow lock and for merging locks.
-    friend cellana::voting_escrow;
 
     const TOKEN_NAME: vector<u8> = b"CELLANA";
     const TOKEN_SYMBOL: vector<u8> = b"CELL";
@@ -126,8 +120,6 @@ module cellana::cellana_token {
         borrow_global<CellanaToken>(token_address())
     }
 
-    #[test_only]
-    friend cellana::cellana_token_tests;
 
     #[test_only]
     public fun test_mint(amount: u64): FungibleAsset acquires CellanaToken {
